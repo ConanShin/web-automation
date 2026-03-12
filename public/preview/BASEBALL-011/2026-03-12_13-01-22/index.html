@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASEBALL-011 Component Preview</title>
+  
+  <!-- React 18 -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body { margin: 0; padding: 0; background-color: #020617; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react,typescript">
+    const { useState, useEffect } = React;
+
+    const StatBadge = ({ label, value, highlight }) => {
+      return (
+        <div
+          className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl text-white min-w-[80px] ${highlight ? 'bg-blue-600' : 'bg-slate-800'}`}
+          role="region"
+          aria-label={`Statistic badge showing ${label}: ${value}`}
+        >
+          <span className="text-xs text-slate-400 uppercase tracking-wider">{label}</span>
+          <span className="text-lg font-bold">{value}</span>
+        </div>
+      );
+    };
+
+    const Avatar = ({ src, alt, initials, size = 'md' }) => {
+      const [hasError, setHasError] = useState(false);
+
+      const sizeClasses = {
+        sm: 'w-16 h-16 md:w-20 md:h-20',
+        md: 'w-24 h-24 md:w-32 md:h-32',
+        lg: 'w-32 h-32 md:w-40 md:h-40',
+      };
+
+      const baseClasses = `rounded-full object-cover border-4 border-blue-500 shadow-lg flex items-center justify-center bg-slate-700 text-white font-bold text-2xl ${sizeClasses[size]}`;
+
+      if (!src || hasError) {
+        return (
+          <div className={baseClasses} role="img" aria-label={alt}>
+            {initials || alt.substring(0, 2).toUpperCase()}
+          </div>
+        );
+      }
+
+      return (
+        <img
+          src={src}
+          alt={alt}
+          className={baseClasses}
+          onError={() => setHasError(true)}
+          role="img"
+          aria-label={alt}
+        />
+      );
+    };
+
+    const PositionTag = ({ position }) => {
+      return (
+        <span
+          className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white uppercase tracking-widest"
+          role="text"
+          aria-label={`Position: ${position}`}
+        >
+          {position}
+        </span>
+      );
+    };
+
+    const SectionHeading = ({ title, subtitle }) => {
+      return (
+        <div className="flex flex-col gap-1 mb-4" role="heading" aria-label={title}>
+          <h2 className="text-xl font-bold text-white relative inline-block">
+            {title}
+            <span className="absolute -bottom-1 left-0 w-12 h-1 bg-cyan-400 rounded-full"></span>
+          </h2>
+          {subtitle && <p className="text-sm text-slate-400 mt-2">{subtitle}</p>}
+        </div>
+      );
+    };
+
+    const StatsTableRow = (props) => {
+      const { season, games, atBats, hits, doubles, triples, homeRuns, rbi, avg, obp, slg, ops, isHighlighted } = props;
+      
+      return (
+        <tr 
+          className={`border-b border-slate-700 hover:bg-slate-700/50 transition-colors ${isHighlighted ? 'bg-slate-800/80 font-medium' : ''}`}
+          role="row"
+          aria-label={`Stats for ${season}`}
+        >
+          <th scope="row" className="px-4 py-3 text-left font-normal text-white">{season}</th>
+          <td className="px-4 py-3 text-right text-slate-300">{games}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{atBats}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{hits}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{doubles}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{triples}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{homeRuns}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{rbi}</td>
+          <td className="px-4 py-3 text-right font-semibold text-white">{avg}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{obp}</td>
+          <td className="px-4 py-3 text-right text-slate-300">{slg}</td>
+          <td className="px-4 py-3 text-right font-semibold text-cyan-400">{ops}</td>
+        </tr>
+      );
+    };
+
+    const GamePerformanceBar = ({
+      date,
+      value,
+      maxValue,
+      isSelected,
+      onClick,
+      onMouseEnter,
+      onMouseLeave,
+      opponent,
+      activeStatLabel
+    }) => {
+      const heightPercentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+      
+      return (
+        <div 
+          className="flex flex-col items-center justify-end gap-2 cursor-pointer group relative h-48 w-8 md:w-12"
+          role="img"
+          aria-label={`Game on ${date}: ${value}`}
+          onClick={onClick}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          tabIndex={0}
+        >
+          <div className={`absolute bottom-full mb-2 bg-slate-900 text-white text-xs p-2 rounded shadow-lg whitespace-nowrap z-10 transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-events-none'}`}>
+            <div className="font-bold">{date} vs {opponent}</div>
+            <div>{activeStatLabel}: {value}</div>
+          </div>
+          
+          <div 
+            className={`w-full bg-cyan-400 rounded-t-md transition-all duration-300 ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-slate-800 bg-cyan-300' : 'group-hover:bg-cyan-300'}`}
+            style={{ height: `${Math.max(heightPercentage, 2)}%` }}
+          ></div>
+          
+          <div className="text-[10px] md:text-xs text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis w-full text-center">
+            {date}
+          </div>
+        </div>
+      );
+    };
+
+    const ChartLegend = ({ items }) => {
+      return (
+        <div className="flex flex-wrap gap-4 mt-2" role="list" aria-label="Chart legend">
+          {items.map((item, index) => (
+            <div key={index} className="flex items-center gap-2" role="listitem">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+              <span className="text-sm text-slate-300">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const PlayerProfileCard = ({
+      playerName,
+      team,
+      position,
+      jerseyNumber,
+      photoUrl,
+      stats,
+      isLoading
+    }) => {
+      if (isLoading) {
+        return (
+          <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl w-full animate-pulse" role="region" aria-label="Loading player profile">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-slate-700"></div>
+            <div className="h-6 w-32 bg-slate-700 rounded mt-2"></div>
+            <div className="h-4 w-24 bg-slate-700 rounded"></div>
+            <div className="flex gap-4 mt-4">
+              <div className="w-20 h-16 bg-slate-700 rounded-xl"></div>
+              <div className="w-20 h-16 bg-slate-700 rounded-xl"></div>
+              <div className="w-20 h-16 bg-slate-700 rounded-xl"></div>
+            </div>
+          </div>
+        );
+      }
+
+      const initials = playerName ? playerName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '';
+
+      return (
+        <div 
+          className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl text-white w-full"
+          role="region"
+          aria-label={`Player profile card for ${playerName}`}
+        >
+          <Avatar src={photoUrl} alt={playerName} initials={initials} />
+          
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-1 flex items-center justify-center gap-2">
+              {playerName}
+              <span className="text-slate-400 font-medium text-lg">#{jerseyNumber}</span>
+            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-slate-300">{team}</span>
+              <span className="text-slate-500">•</span>
+              <PositionTag position={position} />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 mt-2 w-full">
+            <StatBadge label="AVG" value={stats.avg} highlight />
+            <StatBadge label="HR" value={stats.hr} />
+            <StatBadge label="RBI" value={stats.rbi} />
+          </div>
+        </div>
+      );
+    };
+
+    const StatFilterToggle = ({ options, activeOption, onChange }) => {
+      return (
+        <div 
+          className="flex flex-row gap-1 p-1 rounded-xl bg-slate-900 w-fit"
+          role="group"
+          aria-label="Filter chart by statistic"
+        >
+          {options.map(option => {
+            const isActive = activeOption === option.value;
+            return (
+              <button
+                key={option.value}
+                onClick={() => onChange(option.value)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-sm' 
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                }`}
+                aria-pressed={isActive}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      );
+    };
+
+    const DashboardHeader = ({ dashboardTitle, season, teamLogoUrl }) => {
+      return (
+        <header 
+          className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-700 w-full"
+          role="banner"
+          aria-label="Dashboard header"
+        >
+          <div className="flex items-center gap-4">
+            {teamLogoUrl && (
+              <img src={teamLogoUrl} alt="Team Logo" className="w-10 h-10 object-contain" />
+            )}
+            <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">{dashboardTitle}</h1>
+          </div>
+          {season && (
+            <div className="text-sm font-medium text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+              {season}
+            </div>
+          )}
+        </header>
+      );
+    };
+
+    const StatsTable = ({ rows, caption, isLoading }) => {
+      if (isLoading) {
+        return (
+          <div className="w-full overflow-x-auto rounded-2xl bg-slate-800 shadow-lg p-6" role="table" aria-label="Loading batting statistics">
+            <div className="h-6 w-48 bg-slate-700 rounded mb-6 animate-pulse"></div>
+            <div className="space-y-4 animate-pulse">
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-10 w-full bg-slate-700 rounded"></div>)}
+            </div>
+          </div>
+        );
+      }
+
+      if (!rows || rows.length === 0) {
+        return (
+          <div className="w-full rounded-2xl bg-slate-800 shadow-lg p-6 flex flex-col items-center justify-center text-slate-400 min-h-[200px]">
+            <p>No statistics available.</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="w-full overflow-x-auto rounded-2xl bg-slate-800 shadow-lg p-4 md:p-6">
+          <SectionHeading title="Batting Statistics" />
+          <table className="w-full text-sm mt-4 min-w-[800px]" role="table" aria-label={caption || "Batting statistics table"}>
+            {caption && <caption className="sr-only">{caption}</caption>}
+            <thead>
+              <tr className="border-b-2 border-slate-700 text-slate-400 uppercase tracking-wider text-xs">
+                <th scope="col" className="px-4 py-3 text-left font-semibold">Season</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">G</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">AB</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">H</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">2B</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">3B</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">HR</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">RBI</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">AVG</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">OBP</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">SLG</th>
+                <th scope="col" className="px-4 py-3 text-right font-semibold">OPS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, idx) => (
+                <StatsTableRow key={idx} {...row} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    };
+
+    const PerformanceChart = ({ 
+      games, 
+      activeStat = 'hits',
+      isLoading 
+    }) => {
+      const [selectedIndex, setSelectedIndex] = useState(null);
+
+      if (isLoading) {
+        return (
+          <div className="flex flex-col gap-4 p-6 rounded-2xl bg-slate-800 shadow-lg w-full min-h-[300px]" role="region" aria-label="Loading chart">
+            <div className="h-6 w-48 bg-slate-700 rounded mb-4 animate-pulse"></div>
+            <div className="flex-1 flex items-end justify-between gap-2 animate-pulse">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="w-8 bg-slate-700 rounded-t-md" style={{ height: `${Math.random() * 80 + 20}%` }}></div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      if (!games || games.length === 0) {
+        return (
+          <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-800 shadow-lg w-full min-h-[300px] text-slate-400">
+            <p>No recent games available.</p>
+          </div>
+        );
+      }
+
+      const maxValue = Math.max(...games.map(g => g[activeStat]), 1);
+      const statLabels = {
+        hits: 'Hits',
+        homeRuns: 'Home Runs',
+        rbi: 'RBIs'
+      };
+
+      return (
+        <div className="flex flex-col gap-4 p-6 rounded-2xl bg-slate-800 shadow-lg w-full" role="region" aria-label="Recent game performance chart">
+          <SectionHeading title="Recent Performance" subtitle={`Last ${games.length} Games`} />
+          
+          <div className="flex-1 flex items-end justify-between gap-1 sm:gap-2 mt-8 pt-10 border-b border-slate-700 pb-2">
+            {games.map((game, idx) => (
+              <GamePerformanceBar
+                key={idx}
+                date={game.date}
+                value={game[activeStat]}
+                maxValue={maxValue}
+                opponent={game.opponent}
+                activeStatLabel={statLabels[activeStat]}
+                isSelected={selectedIndex === idx}
+                onClick={() => setSelectedIndex(idx === selectedIndex ? null : idx)}
+              />
+            ))}
+          </div>
+          
+          <ChartLegend items={[
+            { label: statLabels[activeStat], color: '#22D3EE' }
+          ]} />
+        </div>
+      );
+    };
+
+    const PlayerStatsDashboard = ({ player, isLoading, error }) => {
+      const [activeStat, setActiveStat] = useState('hits');
+
+      if (error) {
+        return (
+          <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6" role="main" aria-label="Error loading dashboard">
+            <div className="bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-2xl max-w-md text-center">
+              <h2 className="text-xl font-bold mb-2">Error Loading Data</h2>
+              <p>{error}</p>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col" role="main" aria-label="Baseball player statistics dashboard">
+          <DashboardHeader 
+            dashboardTitle="Player Stats Dashboard" 
+            season="2026 Season" 
+          />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 p-4 md:p-6 max-w-7xl mx-auto w-full">
+            <div className="col-span-1 flex flex-col gap-6">
+              <PlayerProfileCard 
+                playerName={player?.name || ''}
+                team={player?.team || ''}
+                position={player?.position || ''}
+                jerseyNumber={player?.jerseyNumber || 0}
+                photoUrl={player?.photoUrl}
+                stats={player?.stats || { avg: '.000', hr: 0, rbi: 0 }}
+                isLoading={isLoading}
+              />
+            </div>
+            
+            <div className="col-span-1 flex flex-col gap-6 w-full overflow-hidden">
+              <StatsTable 
+                rows={player?.seasonStats || []} 
+                caption={`${player?.name || 'Player'} Batting Statistics`}
+                isLoading={isLoading}
+              />
+              
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-end">
+                  <StatFilterToggle 
+                    options={[
+                      { value: 'hits', label: 'Hits' },
+                      { value: 'homeRuns', label: 'Home Runs' },
+                      { value: 'rbi', label: 'RBIs' }
+                    ]}
+                    activeOption={activeStat}
+                    onChange={(val) => setActiveStat(val)}
+                  />
+                </div>
+                <PerformanceChart 
+                  games={player?.recentGames || []} 
+                  activeStat={activeStat}
+                  isLoading={isLoading}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const fetchPlayerData = async (id) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            name: 'Shohei Ohtani',
+            team: 'Los Angeles Dodgers',
+            position: 'DH',
+            jerseyNumber: 17,
+            photoUrl: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=200&h=200&fit=crop',
+            stats: {
+              avg: '.304',
+              hr: 54,
+              rbi: 130
+            },
+            seasonStats: [
+              { season: '2023', games: 135, atBats: 497, hits: 151, doubles: 26, triples: 8, homeRuns: 44, rbi: 95, avg: '.304', obp: '.412', slg: '.654', ops: '1.066' },
+              { season: '2024', games: 159, atBats: 636, hits: 197, doubles: 38, triples: 7, homeRuns: 54, rbi: 130, avg: '.310', obp: '.390', slg: '.646', ops: '1.036', isHighlighted: true },
+              { season: 'Career', games: 860, atBats: 3119, hits: 871, doubles: 167, triples: 36, homeRuns: 225, rbi: 567, avg: '.279', obp: '.366', slg: '.556', ops: '.922' },
+            ],
+            recentGames: [
+              { date: 'Mar 1', opponent: 'SD', hits: 2, homeRuns: 1, rbi: 3 },
+              { date: 'Mar 2', opponent: 'SD', hits: 1, homeRuns: 0, rbi: 0 },
+              { date: 'Mar 4', opponent: 'SF', hits: 3, homeRuns: 2, rbi: 4 },
+              { date: 'Mar 5', opponent: 'SF', hits: 0, homeRuns: 0, rbi: 0 },
+              { date: 'Mar 7', opponent: 'COL', hits: 2, homeRuns: 0, rbi: 1 },
+              { date: 'Mar 8', opponent: 'COL', hits: 1, homeRuns: 1, rbi: 2 },
+              { date: 'Mar 9', opponent: 'COL', hits: 2, homeRuns: 0, rbi: 0 },
+              { date: 'Mar 11', opponent: 'ARI', hits: 1, homeRuns: 0, rbi: 0 },
+              { date: 'Mar 12', opponent: 'ARI', hits: 3, homeRuns: 1, rbi: 2 },
+            ]
+          });
+        }, 1500);
+      });
+    };
+
+    const PlayerStatsDashboardPage = ({ playerId }) => {
+      const [playerData, setPlayerData] = useState(null);
+      const [isLoading, setIsLoading] = useState(true);
+      const [error, setError] = useState(undefined);
+
+      useEffect(() => {
+        let isMounted = true;
+        
+        const loadData = async () => {
+          setIsLoading(true);
+          setError(undefined);
+          try {
+            const data = await fetchPlayerData(playerId);
+            if (isMounted) {
+              setPlayerData(data);
+            }
+          } catch (err) {
+            if (isMounted) {
+              setError('Failed to fetch player data. Please try again later.');
+            }
+          } finally {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+          }
+        };
+
+        if (playerId) {
+          loadData();
+        } else {
+          setIsLoading(false);
+          setError('No player ID provided.');
+        }
+
+        return () => {
+          isMounted = false;
+        };
+      }, [playerId]);
+
+      return (
+        <div className="flex flex-col w-full min-h-screen" role="document" aria-label="Baseball player stats page">
+          <PlayerStatsDashboard 
+            player={playerData}
+            isLoading={isLoading}
+            error={error}
+          />
+        </div>
+      );
+    };
+
+    const App = () => {
+      return <PlayerStatsDashboardPage playerId="ohtani-17" />;
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
