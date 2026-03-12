@@ -72,7 +72,7 @@ export default function HomePage() {
           {events.map((event) => (
             <Link
               key={event.key}
-              href={`/event?key=${event.key}`}
+              href={`/event/${event.key.toLowerCase()}`}
               className="group rounded-xl border border-gray-800 bg-gray-900 p-6 transition hover:border-gray-700 hover:bg-gray-900/80"
             >
               <div className="mb-3 flex items-center gap-3">
