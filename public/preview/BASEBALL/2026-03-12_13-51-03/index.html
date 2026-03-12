@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BASEBALL Game Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #030712;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react,typescript">
+    const { useState, useEffect, useRef } = React;
+
+    
+
+
+const GameTitle = ({ title, subtitle }) => {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center" role="heading" aria-label="야구 게임 타이틀" aria-level={1}>
+      <h1 className="text-5xl md:text-7xl font-extrabold text-yellow-400 tracking-widest drop-shadow-lg">
+        {title}
+      </h1>
+      {subtitle && (
+        <p className="text-base md:text-lg text-gray-300 font-medium">
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+};
+
+
+
+
+
+const RuleItem = ({ icon, label, timing, color, points }) => {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm md:text-base w-full" role="listitem" aria-label="규칙 항목">
+      <div className="flex items-center gap-2">
+        <span>{icon}</span>
+        <span className={`${color} font-bold`}>{label}</span>
+      </div>
+      <div className="flex items-center gap-4 text-gray-400 text-xs md:text-sm">
+        <span>{timing}</span>
+        <span className="font-semibold text-gray-200">{points}점</span>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const StartButton = ({ label = '게임 시작', onClick, disabled }) => {
+  return (
+    <div className="flex items-center justify-center w-full max-w-xs">
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        role="button"
+        aria-label="야구 게임 시작"
+        className="w-full py-4 px-8 text-xl font-bold rounded-full bg-yellow-400 text-gray-900 shadow-lg transition-all duration-150 hover:bg-yellow-300 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {label}
+      </button>
+    </div>
+  );
+};
+
+
+
+
+
+const ChanceBall = ({ active }) => {
+  return (
+    <span
+      role="img"
+      aria-label="기회 공"
+      className={`inline-flex text-2xl transition-all ${
+        active ? 'opacity-100 drop-shadow' : 'opacity-25 grayscale'
+      }`}
+    >
+      ⚾
+    </span>
+  );
+};
+
+
+
+
+
+const PitchingMound = ({ isWinding }) => {
+  return (
+    <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center">
+      <span
+        role="img"
+        aria-label="투수 마운드"
+        className={`w-10 h-10 md:w-14 md:h-14 flex items-center justify-center text-4xl md:text-5xl ${isWinding ? 'animate-pulse' : ''}`}
+      >
+        🧑‍⚾
+      </span>
+      <div className="w-24 h-4 mt-2 bg-yellow-800/80 rounded-[50%] opacity-50 blur-sm" />
+    </div>
+  );
+};
+
+
+
+
+
+const BaseballBall = ({ state, speed = 1500 }) => {
+  let stateClasses = '';
+  switch (state) {
+    case 'idle':
+      stateClasses = 'top-1/3 left-1/2 -translate-x-1/2 w-4 h-4 opacity-0 scale-50';
+      break;
+    case 'incoming':
+      stateClasses = 'top-[70%] left-1/2 -translate-x-1/2 w-16 h-16 md:w-24 md:h-24 opacity-100 scale-100';
+      break;
+    case 'hit':
+      stateClasses = 'top-[-20%] left-1/2 -translate-x-1/2 opacity-0 scale-150';
+      break;
+    case 'miss':
+      stateClasses = 'top-[120%] left-1/2 -translate-x-1/2 opacity-0 scale-110';
+      break;
+  }
+
+  return (
+    <div
+      role="img"
+      aria-label="날아오는 야구공"
+      className={`absolute transition-all ease-linear flex items-center justify-center text-5xl md:text-7xl drop-shadow-2xl ${stateClasses}`}
+      style={{ transitionDuration: state === 'incoming' ? `${speed}ms` : state === 'hit' || state === 'miss' ? '500ms' : '0ms' }}
+    >
+      ⚾
+    </div>
+  );
+};
+
+
+
+
+
+const BatterSilhouette = ({ isSwinging, result }) => {
+  return (
+    <div
+      role="img"
+      aria-label="타자 실루엣"
+      className="absolute bottom-20 right-4 md:right-16 flex items-center justify-center text-7xl md:text-8xl w-16 h-24 md:w-24 md:h-36"
+    >
+      <div className={`transition-transform duration-100 ${isSwinging ? 'rotate-[-30deg]' : 'rotate-0'} ${result === 'homerun' ? 'animate-bounce' : ''}`}>
+        🤾‍♂️
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const TapHint = ({ visible }) => {
+  if (!visible) return null;
+  return (
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2" role="note" aria-label="탭 안내 메시지">
+      <div className="text-white text-sm font-semibold bg-black/40 px-4 py-2 rounded-full animate-bounce">
+        탭하여 배팅!
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const TimingCursor = ({ progress }) => {
+  return (
+    <div
+      className="absolute top-0 h-full w-1 transition-none z-10"
+      style={{ left: `${progress}%`, transform: 'translateX(-50%)' }}
+      role="presentation"
+      aria-hidden="true"
+    >
+      <div className="w-1 h-full bg-white rounded shadow-md shadow-white/50" />
+      <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-white drop-shadow" />
+    </div>
+  );
+};
+
+
+
+
+
+const ResultTitle = ({ grade, message }) => {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center" role="heading" aria-level={2} aria-label="결과 등급 및 메시지">
+      <div className="text-6xl font-extrabold text-yellow-400 drop-shadow-lg">{grade}</div>
+      <div className="text-xl text-gray-200 font-semibold">{message}</div>
+    </div>
+  );
+};
+
+
+
+
+
+const HitRecordItem = ({ result, index }) => {
+  const colorMap = {
+    homerun: "text-yellow-400",
+    triple:  "text-orange-400",
+    double:  "text-green-400",
+    single:  "text-blue-400",
+    strike:  "text-red-400"
+  };
+  
+  const iconMap = {
+    homerun: "💥",
+    triple:  "🔥",
+    double:  "✅",
+    single:  "👍",
+    strike:  "❌"
+  };
+  
+  const labelMap = {
+    homerun: "HR",
+    triple:  "3B",
+    double:  "2B",
+    single:  "1B",
+    strike:  "ST"
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-1" role="listitem" aria-label="타격 결과 항목">
+      <span className="text-gray-500 text-xs">{index}구</span>
+      <span className="text-3xl">{iconMap[result]}</span>
+      <span className={`text-xs font-bold ${colorMap[result]}`}>{labelMap[result]}</span>
+    </div>
+  );
+};
+
+
+
+
+
+const RetryButton = ({ onClick, label = '다시 하기' }) => {
+  return (
+    <div className="flex items-center justify-center w-full max-w-xs">
+      <button
+        type="button"
+        onClick={onClick}
+        role="button"
+        aria-label="게임 다시 하기"
+        className="w-full py-4 px-8 text-xl font-bold rounded-full bg-yellow-400 text-gray-900 shadow-lg transition-all duration-150 hover:bg-yellow-300 hover:scale-105 active:scale-95"
+      >
+        {label}
+      </button>
+    </div>
+  );
+};
+
+
+
+
+
+const ShareButton = ({ onClick, label = '결과 공유' }) => {
+  return (
+    <div className="flex items-center justify-center w-full max-w-xs">
+      <button
+        type="button"
+        onClick={onClick}
+        role="button"
+        aria-label="게임 결과 공유"
+        className="w-full py-3 px-8 text-base font-semibold rounded-full border border-gray-600 text-gray-300 bg-transparent hover:border-yellow-400 hover:text-yellow-400 transition-all duration-150 active:scale-95"
+      >
+        {label}
+      </button>
+    </div>
+  );
+};
+
+
+
+
+
+
+const RuleCard = ({ rules, chances }) => {
+  return (
+    <div className="flex flex-col gap-4 bg-gray-800 border border-gray-700 rounded-2xl p-6 w-full max-w-md shadow-xl" role="region" aria-label="게임 규칙 설명">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-bold text-gray-200">점수 규칙</h2>
+        <span className="text-sm font-semibold text-gray-400">총 {chances}번의 기회</span>
+      </div>
+      <div className="flex flex-col gap-3">
+        {rules.map((rule, idx) => (
+          <RuleItem key={idx} {...rule} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const ScoreDisplay = ({ score, label = 'SCORE' }) => {
+  const [animate, setAnimate] = React.useState(false);
+
+  React.useEffect(() => {
+    setAnimate(true);
+    const timer = setTimeout(() => setAnimate(false), 500);
+    return () => clearTimeout(timer);
+  }, [score]);
+
+  return (
+    <div className="flex flex-col items-start gap-0.5" role="text" aria-label="현재 점수">
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">{label}</span>
+      <span className={`text-3xl md:text-4xl font-extrabold tabular-nums transition-colors duration-300 ${animate ? 'animate-bounce text-yellow-400' : 'text-white'}`}>
+        {score}
+      </span>
+    </div>
+  );
+};
+
+
+
+
+
+
+const ChanceIndicator = ({ chancesLeft, totalChances = 3 }) => {
+  return (
+    <div className="flex flex-col items-end gap-0.5" role="status" aria-label="남은 기회 표시">
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">OUTS</span>
+      <div className="flex gap-1">
+        {Array.from({ length: totalChances }).map((_, idx) => (
+          <ChanceBall key={idx} active={idx < chancesLeft} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const TimingBar = ({ zones, height = 'h-6' }) => {
+  return (
+    <div className={`flex w-full ${height} rounded-full overflow-hidden shadow-inner`} role="presentation" aria-label="타이밍 구간 바">
+      {zones.map((zone, idx) => (
+        <div key={idx} className={`${zone.color} h-full`} style={{ flex: zone.flex }} />
+      ))}
+    </div>
+  );
+};
+
+
+
+
+
+const ResultFeedback = ({ result, visible }) => {
+  if (!visible || !result) return null;
+
+  const config = {
+    homerun: {
+      text: "💥 홈런!",
+      className: "text-5xl md:text-7xl font-extrabold text-yellow-400 animate-ping drop-shadow-2xl"
+    },
+    triple: {
+      text: "🔥 3루타!",
+      className: "text-4xl md:text-6xl font-bold text-orange-400 animate-bounce"
+    },
+    double: {
+      text: "✅ 2루타!",
+      className: "text-4xl md:text-6xl font-bold text-green-400 animate-bounce"
+    },
+    single: {
+      text: "👍 1루타!",
+      className: "text-3xl md:text-5xl font-bold text-blue-400 animate-pulse"
+    },
+    strike: {
+      text: "❌ 스트라이크!",
+      className: "text-3xl md:text-5xl font-bold text-red-400 animate-pulse" // Using pulse instead of shake as shake isn't a default tailwind animation
+    }
+  };
+
+  const { text, className } = config[result];
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50" role="alert" aria-live="assertive" aria-label="타격 결과">
+      <div className={`${className} transition-all duration-150`}>
+        {text}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const FinalScoreCard = ({ score, maxScore = 12 }) => {
+  return (
+    <div className="flex flex-col items-center gap-1 bg-gray-800 border border-yellow-400/30 rounded-2xl px-10 py-6 shadow-xl" role="text" aria-label="최종 점수 카드">
+      <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">FINAL SCORE</span>
+      <div className="flex items-baseline gap-2">
+        <span className="text-6xl font-extrabold text-white tabular-nums">{score}</span>
+        <span className="text-sm text-gray-500">/ {maxScore}</span>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+const HitRecordList = ({ records }) => {
+  return (
+    <div className="flex flex-col items-center gap-2 w-full max-w-md bg-gray-900/50 p-4 rounded-xl">
+      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-2">타격 기록</h3>
+      <div className="flex items-center justify-center gap-6 w-full" role="list" aria-label="타격 기록 목록">
+        {records.map((record, idx) => (
+          <HitRecordItem key={idx} result={record} index={idx + 1} />
+        ))}
+        {records.length === 0 && <div className="text-gray-500 text-sm py-4">기록이 없습니다.</div>}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+const GameHUD = ({ score, chancesLeft, totalChances = 3, pitchCount = 0 }) => {
+  return (
+    <div className="flex items-center justify-between w-full px-6 pt-6 pb-4 bg-gray-900 border-b border-gray-700 shadow-lg z-10 relative" role="status" aria-label="게임 현황 표시">
+      <ScoreDisplay score={score} />
+      
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs font-bold text-gray-500 bg-gray-800 px-3 py-1 rounded-full border border-gray-700">
+          PITCH {pitchCount}
+        </span>
+      </div>
+
+      <ChanceIndicator chancesLeft={chancesLeft} totalChances={totalChances} />
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+const BallField = ({ ballState, ballSpeed = 1500, onTap, result }) => {
+  const isWinding = ballState === 'idle';
+  const isSwinging = ballState === 'hit' || ballState === 'miss' || (result !== undefined && result !== null);
+
+  return (
+    <div
+      className="relative flex items-center justify-center flex-1 w-full overflow-hidden cursor-pointer bg-gradient-to-b from-sky-700 via-green-700 to-green-900 active:bg-gradient-to-b active:from-sky-800 active:via-green-800 active:to-green-950 transition-colors"
+      onClick={onTap}
+      role="button"
+      aria-label="배팅 타이밍 입력 영역 - 탭하여 배팅"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          onTap();
+        }
+      }}
+    >
+      <div className="absolute bottom-0 w-[200%] h-[50%] bg-green-800/50 rounded-[50%] translate-y-1/2 -translate-x-1/4 transform scale-y-50 blur-sm" />
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-32 h-32 md:w-48 md:h-48 border-4 border-white/20 transform rotate-45" />
+
+      <PitchingMound isWinding={isWinding} />
+      
+      <BaseballBall state={ballState} speed={ballSpeed} />
+      
+      <BatterSilhouette isSwinging={isSwinging} result={result} />
+      
+      <TapHint visible={ballState === 'idle'} />
+    </div>
+  );
+};
+
+
+
+
+
+
+
+const TimingZone = ({ progress, zones }) => {
+  const barZones = zones.map(zone => ({
+    color: zone.color,
+    flex: zone.rangeEnd - zone.rangeStart
+  }));
+
+  return (
+    <div className="flex flex-col items-center w-full px-6 py-6 gap-3 bg-gray-900 border-t border-gray-800 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.5)] z-10" role="progressbar" aria-label="타이밍 진행 바" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+      <div className="w-full flex justify-between px-2 text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">
+        <span>Early</span>
+        <span className="text-yellow-500 font-extrabold flex flex-col items-center gap-1">
+          <span className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse" />
+          PERFECT
+        </span>
+        <span>Late</span>
+      </div>
+      
+      <div className="relative w-full">
+        <TimingBar zones={barZones} height="h-8 md:h-10" />
+        <TimingCursor progress={progress} />
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+const LobbyScreen = ({ onStart }) => {
+  const rules = [
+    { icon: "💥", label: "홈런", timing: "완벽 (±50ms)", color: "text-yellow-400", points: 4 },
+    { icon: "🔥", label: "3루타", timing: "훌륭 (±100ms)", color: "text-orange-400", points: 3 },
+    { icon: "✅", label: "2루타", timing: "좋음 (±150ms)", color: "text-green-400", points: 2 },
+    { icon: "👍", label: "1루타", timing: "보통 (±200ms)", color: "text-blue-400", points: 1 },
+    { icon: "❌", label: "스트라이크", timing: "미스", color: "text-red-400", points: 0 }
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-10 w-full min-h-screen px-6 py-12 bg-gray-950" role="region" aria-label="게임 로비">
+      <GameTitle title="⚾ BASEBALL" subtitle="타이밍을 맞춰 홈런을 노려라!" />
+      <RuleCard rules={rules} chances={3} />
+      <StartButton onClick={onStart} />
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+const GameScreen = ({
+  score,
+  chancesLeft,
+  ballState,
+  lastResult,
+  onBat,
+  progress,
+  zones,
+  pitchCount
+}) => {
+  return (
+    <div className="flex flex-col items-center justify-between w-full h-full min-h-[100dvh] select-none bg-gray-950" role="region" aria-label="게임 플레이 화면" aria-live="polite">
+      <GameHUD score={score} chancesLeft={chancesLeft} pitchCount={pitchCount} />
+      
+      <div className="relative flex-1 w-full overflow-hidden flex flex-col">
+        <BallField ballState={ballState} onTap={onBat} result={lastResult} />
+        <ResultFeedback result={lastResult || null} visible={!!lastResult} />
+      </div>
+      
+      <TimingZone progress={progress} zones={zones} />
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+const ResultScreen = ({ finalScore, hitRecord, onRetry, onShare }) => {
+  const getGrade = (score) => {
+    if (score >= 12) return { grade: 'S' as const, message: '완벽한 타자! 전설의 홈런왕!' };
+    if (score >= 9) return { grade: 'A' as const, message: '훌륭한 타격 솜씨입니다!' };
+    if (score >= 6) return { grade: 'B' as const, message: '좋은 타자네요!' };
+    if (score >= 3) return { grade: 'C' as const, message: '아쉬운 결과, 조금 더 연습해보세요!' };
+    return { grade: 'D' as const, message: '타이밍을 맞추는 연습이 필요합니다!' };
+  };
+
+  const { grade, message } = getGrade(finalScore);
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-8 w-full min-h-screen px-6 py-12 bg-gray-950" role="region" aria-label="게임 결과 화면">
+      <ResultTitle grade={grade} message={message} />
+      <FinalScoreCard score={finalScore} maxScore={12} />
+      <HitRecordList records={hitRecord} />
+      <div className="flex flex-col items-center gap-4 w-full mt-4">
+        <RetryButton onClick={onRetry} />
+        {onShare && <ShareButton onClick={onShare} />}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+const GamePage = () => {
+  const [gameState, setGameState] = useState('lobby');
+  const [score, setScore] = useState(0);
+  const [chancesLeft, setChancesLeft] = useState(3);
+  const [ballState, setBallState] = useState('idle');
+  const [lastResult, setLastResult] = useState(null);
+  const [hitRecord, setHitRecord] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [pitchCount, setPitchCount] = useState(0);
+  
+  const animationRef = useRef();
+  const progressRef = useRef(0);
+  const ballSpeed = 1500;
+
+  const zones = [
+    { label: "스트라이크", color: "bg-red-600", rangeStart: 0, rangeEnd: 30 },
+    { label: "1루타", color: "bg-blue-500", rangeStart: 30, rangeEnd: 42 },
+    { label: "2루타", color: "bg-green-500", rangeStart: 42, rangeEnd: 52 },
+    { label: "홈런", color: "bg-yellow-400", rangeStart: 52, rangeEnd: 60 },
+    { label: "2루타", color: "bg-green-500", rangeStart: 60, rangeEnd: 70 },
+    { label: "1루타", color: "bg-blue-500", rangeStart: 70, rangeEnd: 82 },
+    { label: "스트라이크", color: "bg-red-600", rangeStart: 82, rangeEnd: 100 }
+  ];
+
+  const startGame = () => {
+    setGameState('playing');
+    setScore(0);
+    setChancesLeft(3);
+    setHitRecord([]);
+    setPitchCount(0);
+    preparePitch();
+  };
+
+  const preparePitch = () => {
+    setBallState('idle');
+    setLastResult(null);
+    setProgress(0);
+    progressRef.current = 0;
+    
+    setTimeout(() => {
+      startPitch();
+    }, 1000);
+  };
+
+  const startPitch = () => {
+    setBallState('incoming');
+    setPitchCount(prev => prev + 1);
+    const startTime = performance.now();
+    
+    const animate = (time) => {
+      const elapsed = time - startTime;
+      const currentProgress = Math.min((elapsed / ballSpeed) * 100, 100);
+      progressRef.current = currentProgress;
+      setProgress(currentProgress);
+      
+      if (currentProgress < 100) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        handleMiss();
+      }
+    };
+    
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  const handleMiss = () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    
+    setBallState('miss');
+    processResult('strike');
+  };
+
+  const handleBat = () => {
+    if (ballState !== 'incoming') return;
+    
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    
+    const currentProgress = progressRef.current;
+    
+    let result = 'strike';
+    if (currentProgress >= 48 && currentProgress < 52) result = 'triple';
+    else if (currentProgress >= 52 && currentProgress <= 60) result = 'homerun';
+    else if (currentProgress > 60 && currentProgress <= 64) result = 'triple';
+    else if (currentProgress >= 42 && currentProgress < 48) result = 'double';
+    else if (currentProgress > 64 && currentProgress <= 70) result = 'double';
+    else if (currentProgress >= 30 && currentProgress < 42) result = 'single';
+    else if (currentProgress > 70 && currentProgress <= 82) result = 'single';
+
+    setBallState('hit');
+    processResult(result);
+  };
+
+  const processResult = (result) => {
+    setLastResult(result);
+    setHitRecord(prev => [...prev, result]);
+    
+    const points = { homerun: 4, triple: 3, double: 2, single: 1, strike: 0 };
+    setScore(prev => prev + points[result]);
+    
+    if (result === 'strike') {
+      setChancesLeft(prev => {
+        const next = prev - 1;
+        if (next <= 0) {
+          setTimeout(() => setGameState('result'), 2000);
+        } else {
+          setTimeout(preparePitch, 2000);
+        }
+        return next;
+      });
+    } else {
+      setTimeout(preparePitch, 2000);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-gray-950 overflow-hidden text-white" role="main" aria-label="야구 타이밍 게임">
+      {gameState === 'lobby' && <LobbyScreen onStart={startGame} />}
+      {gameState === 'playing' && (
+        <GameScreen
+          score={score}
+          chancesLeft={chancesLeft}
+          ballState={ballState}
+          lastResult={lastResult}
+          onBat={handleBat}
+          progress={progress}
+          zones={zones}
+          pitchCount={pitchCount}
+        />
+      )}
+      {gameState === 'result' && (
+        <ResultScreen
+          finalScore={score}
+          hitRecord={hitRecord}
+          onRetry={startGame}
+          onShare={() => alert(`내 최종 점수: ${score}점!`)}
+        />
+      )}
+    </div>
+  );
+};
+
+
+
+
+    const App = () => {
+      return <GamePage />;
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
