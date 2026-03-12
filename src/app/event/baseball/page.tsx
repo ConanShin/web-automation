@@ -3,86 +3,86 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 // --- Interfaces ---
-export interface GameHeaderProps {
+interface GameHeaderProps {
   score: number;
   outCount: number;
   maxOuts?: number;
   baseStatus: { first: boolean; second: boolean; third: boolean };
 }
 
-export interface ScoreDisplayProps {
+interface ScoreDisplayProps {
   score: number;
 }
 
-export interface BaseDiagramProps {
+interface BaseDiagramProps {
   first: boolean;
   second: boolean;
   third: boolean;
 }
 
-export interface OutCountIndicatorProps {
+interface OutCountIndicatorProps {
   outCount: number;
   maxOuts?: number;
 }
 
-export interface GameFieldProps {
-  gameState: 'idle' | 'pitching' | 'hit' | 'strike';
+interface GameFieldProps {
+  gameState: 'start' | 'idle' | 'pitching' | 'hit' | 'strike' | 'result';
   pitchSpeed?: number;
   pitchProgress: number;
 }
 
-export interface PitcherSpriteProps {
+interface PitcherSpriteProps {
   isPitching: boolean;
 }
 
-export interface BallTrajectoryProps {
+interface BallTrajectoryProps {
   isVisible: boolean;
   pitchDuration: number;
   progress: number;
 }
 
-export interface TimingGaugeProps {
+interface TimingGaugeProps {
   isActive: boolean;
   progress: number;
   sweetSpotStart: number;
   sweetSpotEnd: number;
 }
 
-export interface BattingZoneProps {
+interface BattingZoneProps {
   onBat: (forceProgress?: number) => void;
   isDisabled?: boolean;
   swingState: 'idle' | 'swinging' | 'hit' | 'miss' | 'disabled';
 }
 
-export interface BatterSpriteProps {
+interface BatterSpriteProps {
   swingState: 'idle' | 'swinging' | 'hit' | 'miss' | 'disabled';
 }
 
-export interface BatSwingFeedbackProps {
+interface BatSwingFeedbackProps {
   result: 'homerun' | 'triple' | 'double' | 'single' | 'strike' | null;
   isVisible: boolean;
 }
 
-export interface TapHintLabelProps {
+interface TapHintLabelProps {
   isHighlighted: boolean;
 }
 
-export interface GameResultOverlayProps {
+interface GameResultOverlayProps {
   isVisible: boolean;
   finalScore: number;
   resultSummary: { homerun: number; triple: number; double: number; single: number; strike: number };
   onRestart: () => void;
 }
 
-export interface ResultTitleProps {
+interface ResultTitleProps {
   grade: 'excellent' | 'good' | 'average' | 'poor';
 }
 
-export interface FinalScoreDisplayProps {
+interface FinalScoreDisplayProps {
   score: number;
 }
 
-export interface ResultSummaryCardProps {
+interface ResultSummaryCardProps {
   homerun: number;
   triple: number;
   double: number;
@@ -90,21 +90,21 @@ export interface ResultSummaryCardProps {
   strike: number;
 }
 
-export interface RestartButtonProps {
+interface RestartButtonProps {
   onClick: () => void;
 }
 
-export interface StartScreenProps {
+interface StartScreenProps {
   onStart: () => void;
   isVisible: boolean;
 }
 
-export interface StartButtonProps {
+interface StartButtonProps {
   onClick: () => void;
 }
 
 // --- Atoms ---
-export const FieldBackground: React.FC = () => (
+const FieldBackground: React.FC = () => (
   <div className="absolute inset-0 w-full h-full pointer-events-none">
     <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_40px,rgba(255,255,255,0.03)_40px,rgba(255,255,255,0.03)_41px)]" />
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-48 h-48 border-2 border-white/20 rotate-45" />
@@ -112,13 +112,13 @@ export const FieldBackground: React.FC = () => (
   </div>
 );
 
-export const PitcherSprite: React.FC<PitcherSpriteProps> = ({ isPitching }) => (
+const PitcherSprite: React.FC<PitcherSpriteProps> = ({ isPitching }) => (
   <div className={`absolute top-[20%] left-1/2 -translate-x-1/2 flex items-center justify-center w-16 h-16 ${isPitching ? 'animate-bounce' : ''}`}>
     <span className="text-5xl">🤾</span>
   </div>
 );
 
-export const BatterSprite: React.FC<BatterSpriteProps> = ({ swingState }) => {
+const BatterSprite: React.FC<BatterSpriteProps> = ({ swingState }) => {
   let content = '🧍🏏';
   let tw = 'w-20 h-20 flex items-center justify-center text-5xl transition-all';
   
@@ -140,7 +140,7 @@ export const BatterSprite: React.FC<BatterSpriteProps> = ({ swingState }) => {
   );
 };
 
-export const BatSwingFeedback: React.FC<BatSwingFeedbackProps> = ({ result, isVisible }) => {
+const BatSwingFeedback: React.FC<BatSwingFeedbackProps> = ({ result, isVisible }) => {
   if (!isVisible || !result) return null;
   
   const config: Record<string, { text: string, color: string }> = {
@@ -164,7 +164,7 @@ export const BatSwingFeedback: React.FC<BatSwingFeedbackProps> = ({ result, isVi
   );
 };
 
-export const TapHintLabel: React.FC<TapHintLabelProps> = ({ isHighlighted }) => (
+const TapHintLabel: React.FC<TapHintLabelProps> = ({ isHighlighted }) => (
   <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center pointer-events-none">
     <span className={isHighlighted 
       ? "text-base text-yellow-400 font-bold tracking-widest drop-shadow-[0_0_6px_rgba(250,204,21,0.7)]" 
@@ -174,7 +174,7 @@ export const TapHintLabel: React.FC<TapHintLabelProps> = ({ isHighlighted }) => 
   </div>
 );
 
-export const ResultTitle: React.FC<ResultTitleProps> = ({ grade }) => {
+const ResultTitle: React.FC<ResultTitleProps> = ({ grade }) => {
   const config = {
     excellent: { emoji: "🏆", text: "홈런왕!", tw: "text-yellow-400 drop-shadow-[0_0_16px_rgba(250,204,21,0.8)]" },
     good: { emoji: "⚾", text: "훌륭해요!", tw: "text-green-400" },
@@ -190,7 +190,7 @@ export const ResultTitle: React.FC<ResultTitleProps> = ({ grade }) => {
   );
 };
 
-export const RestartButton: React.FC<RestartButtonProps> = ({ onClick }) => (
+const RestartButton: React.FC<RestartButtonProps> = ({ onClick }) => (
   <button 
     onClick={onClick}
     className="w-full max-w-xs py-4 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-950 text-lg font-black tracking-wide shadow-[0_4px_24px_rgba(250,204,21,0.4)] active:scale-95 transition-transform duration-100 hover:shadow-[0_4px_32px_rgba(250,204,21,0.6)] flex items-center justify-center gap-2 cursor-pointer"
@@ -199,7 +199,7 @@ export const RestartButton: React.FC<RestartButtonProps> = ({ onClick }) => (
   </button>
 );
 
-export const GameLogoTitle: React.FC = () => (
+const GameLogoTitle: React.FC = () => (
   <div className="flex flex-col items-center gap-2 text-center">
     <span className="text-7xl mb-2">⚾</span>
     <h1 className="text-4xl font-black text-white tracking-tight">야구 타이밍 게임</h1>
@@ -207,7 +207,7 @@ export const GameLogoTitle: React.FC = () => (
   </div>
 );
 
-export const StartButton: React.FC<StartButtonProps> = ({ onClick }) => (
+const StartButton: React.FC<StartButtonProps> = ({ onClick }) => (
   <button 
     onClick={onClick}
     className="w-full max-w-sm py-5 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-950 text-xl font-black tracking-wide shadow-[0_6px_32px_rgba(250,204,21,0.45)] active:scale-95 transition-all duration-150 hover:shadow-[0_8px_40px_rgba(250,204,21,0.6)] flex items-center justify-center gap-2 cursor-pointer"
@@ -217,7 +217,7 @@ export const StartButton: React.FC<StartButtonProps> = ({ onClick }) => (
 );
 
 // --- Molecules ---
-export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => (
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => (
   <div className="flex flex-col items-center gap-0.5">
     <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Score</span>
     <span className="text-4xl font-black tabular-nums text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]">
@@ -226,15 +226,15 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ score }) => (
   </div>
 );
 
-export const BaseDiagram: React.FC<BaseDiagramProps> = ({ first, second, third }) => {
-  const BaseIcon = ({ occupied }: { occupied: boolean }) => (
-    <div className={`w-4 h-4 rotate-45 border-2 ${
-      occupied 
-        ? 'border-yellow-400 bg-yellow-400 shadow-[0_0_6px_2px_rgba(250,204,21,0.5)]' 
-        : 'border-gray-600 bg-transparent'
-    }`} />
-  );
+const BaseIcon = ({ occupied }: { occupied: boolean }) => (
+  <div className={`w-4 h-4 rotate-45 border-2 ${
+    occupied 
+      ? 'border-yellow-400 bg-yellow-400 shadow-[0_0_6px_2px_rgba(250,204,21,0.5)]' 
+      : 'border-gray-600 bg-transparent'
+  }`} />
+);
 
+const BaseDiagram: React.FC<BaseDiagramProps> = ({ first, second, third }) => {
   return (
     <div className="grid grid-cols-3 grid-rows-2 w-16 h-12 place-items-center relative">
       <div className="col-start-2 row-start-1"><BaseIcon occupied={second} /></div>
@@ -244,7 +244,7 @@ export const BaseDiagram: React.FC<BaseDiagramProps> = ({ first, second, third }
   );
 };
 
-export const OutCountIndicator: React.FC<OutCountIndicatorProps> = ({ outCount, maxOuts = 3 }) => {
+const OutCountIndicator: React.FC<OutCountIndicatorProps> = ({ outCount, maxOuts = 3 }) => {
   return (
     <div className="flex flex-col items-center gap-1">
       <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Out</span>
@@ -264,7 +264,7 @@ export const OutCountIndicator: React.FC<OutCountIndicatorProps> = ({ outCount, 
   );
 };
 
-export const BallTrajectory: React.FC<BallTrajectoryProps> = ({ isVisible, progress }) => {
+const BallTrajectory: React.FC<BallTrajectoryProps> = ({ isVisible, progress }) => {
   if (!isVisible) return null;
   const top = 22 + (90 - 22) * progress;
   const left = 48 + (44 - 48) * progress;
@@ -288,7 +288,7 @@ export const BallTrajectory: React.FC<BallTrajectoryProps> = ({ isVisible, progr
   );
 };
 
-export const TimingGauge: React.FC<TimingGaugeProps> = ({ isActive, progress, sweetSpotStart, sweetSpotEnd }) => (
+const TimingGauge: React.FC<TimingGaugeProps> = ({ isActive, progress, sweetSpotStart, sweetSpotEnd }) => (
   <div className={`absolute bottom-28 left-1/2 -translate-x-1/2 w-4/5 max-w-sm flex flex-col items-center gap-2 transition-opacity duration-200 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
     <span className="text-xs text-gray-400 font-medium tracking-wider uppercase">Timing</span>
     <div className="relative w-full h-4 rounded-full bg-gray-700/70 backdrop-blur-sm overflow-hidden border border-gray-600/50">
@@ -308,7 +308,7 @@ export const TimingGauge: React.FC<TimingGaugeProps> = ({ isActive, progress, sw
   </div>
 );
 
-export const FinalScoreDisplay: React.FC<FinalScoreDisplayProps> = ({ score }) => {
+const FinalScoreDisplay: React.FC<FinalScoreDisplayProps> = ({ score }) => {
   const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
@@ -344,7 +344,7 @@ export const FinalScoreDisplay: React.FC<FinalScoreDisplayProps> = ({ score }) =
   );
 };
 
-export const ResultSummaryCard: React.FC<ResultSummaryCardProps> = ({ homerun, triple, double, single, strike }) => {
+const ResultSummaryCard: React.FC<ResultSummaryCardProps> = ({ homerun, triple, double, single, strike }) => {
   const rows = [
     { key: "homerun", label: "홈런", icon: "🏆", valueColor: "text-yellow-400", value: homerun },
     { key: "triple", label: "3루타", icon: "🔥", valueColor: "text-orange-400", value: triple },
@@ -368,7 +368,7 @@ export const ResultSummaryCard: React.FC<ResultSummaryCardProps> = ({ homerun, t
   );
 };
 
-export const RulesSummaryCard: React.FC = () => {
+const RulesSummaryCard: React.FC = () => {
   const ruleItems = [
     { icon: "🏆", label: "홈런", description: "가장 빠른 타이밍 (퍼펙트)", color: "text-yellow-400" },
     { icon: "🔥", label: "3루타", description: "타이밍이 조금 빠름", color: "text-orange-400" },
@@ -397,7 +397,7 @@ export const RulesSummaryCard: React.FC = () => {
 };
 
 // --- Organisms ---
-export const GameHeader: React.FC<GameHeaderProps> = ({ score, outCount, maxOuts = 3, baseStatus }) => (
+const GameHeader: React.FC<GameHeaderProps> = ({ score, outCount, maxOuts = 3, baseStatus }) => (
   <header className="flex items-center justify-between w-full px-4 py-3 bg-gray-900 border-b border-gray-700 z-10">
     <ScoreDisplay score={score} />
     <BaseDiagram {...baseStatus} />
@@ -405,7 +405,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({ score, outCount, maxOuts
   </header>
 );
 
-export const GameField: React.FC<GameFieldProps> = ({ gameState, pitchProgress }) => (
+const GameField: React.FC<GameFieldProps> = ({ gameState, pitchProgress }) => (
   <div className="relative flex-1 w-full bg-gradient-to-b from-sky-900 via-green-900 to-green-800 overflow-hidden min-h-[50vh]">
     <FieldBackground />
     <PitcherSprite isPitching={gameState === 'pitching'} />
@@ -419,7 +419,7 @@ export const GameField: React.FC<GameFieldProps> = ({ gameState, pitchProgress }
   </div>
 );
 
-export const BattingZone: React.FC<BattingZoneProps> = ({ onBat, isDisabled, swingState }) => (
+const BattingZone: React.FC<BattingZoneProps> = ({ onBat, isDisabled, swingState }) => (
   <div 
     className={`relative w-full flex items-center justify-center py-4 bg-gray-950/80 border-t border-gray-800 select-none h-32 md:h-40 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer active:bg-gray-900/80'}`}
     onClick={() => !isDisabled && onBat()}
@@ -433,7 +433,7 @@ export const BattingZone: React.FC<BattingZoneProps> = ({ onBat, isDisabled, swi
   </div>
 );
 
-export const GameResultOverlay: React.FC<GameResultOverlayProps> = ({ isVisible, finalScore, resultSummary, onRestart }) => {
+const GameResultOverlay: React.FC<GameResultOverlayProps> = ({ isVisible, finalScore, resultSummary, onRestart }) => {
   if (!isVisible) return null;
   let grade: 'excellent' | 'good' | 'average' | 'poor' = 'poor';
   if (finalScore >= 10) grade = 'excellent';
@@ -451,7 +451,7 @@ export const GameResultOverlay: React.FC<GameResultOverlayProps> = ({ isVisible,
 };
 
 // --- Templates ---
-export const StartScreen: React.FC<StartScreenProps> = ({ onStart, isVisible }) => {
+const StartScreen: React.FC<StartScreenProps> = ({ onStart, isVisible }) => {
   if (!isVisible) return null;
   return (
     <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-gray-950 px-6 gap-8">
@@ -508,8 +508,8 @@ export default function Page() {
       setOutCount(o => o + 1);
     } else {
       setBaseStatus(bases => {
-        let b = [bases.first, bases.second, bases.third];
-        let newB = [false, false, false];
+        const b = [bases.first, bases.second, bases.third];
+        const newB = [false, false, false];
         let addedScore = 0;
         const hitBases = result === 'homerun' ? 4 : result === 'triple' ? 3 : result === 'double' ? 2 : 1;
         
