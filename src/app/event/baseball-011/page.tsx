@@ -107,8 +107,8 @@ const StatBadge = ({ label, value, highlight }: StatBadgeProps) => {
   return (
     <div
       role="listitem"
-      aria-label={\`Stat badge showing \${label}: \${value}\`}
-      className={\`flex flex-col items-center justify-center px-4 py-2 rounded-xl \${highlight ? 'bg-indigo-600' : 'bg-gray-800'} text-white min-w-[72px]\`}
+      aria-label={`Stat badge showing ${label}: ${value}`}
+      className={`flex flex-col items-center justify-center px-4 py-2 rounded-xl ${highlight ? 'bg-indigo-600' : 'bg-gray-800'} text-white min-w-[72px]`}
     >
       <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</span>
       <span className="text-2xl font-extrabold tabular-nums">{value}</span>
@@ -126,8 +126,8 @@ const AvatarImage = ({ src, alt, initials, size = 'md' }: AvatarImageProps) => {
   return (
     <div
       role="img"
-      aria-label={\`Player photo of \${alt}\`}
-      className={\`inline-flex items-center justify-center rounded-full overflow-hidden bg-indigo-600 text-white font-bold select-none \${sizeClasses[size]}\`}
+      aria-label={`Player photo of ${alt}`}
+      className={`inline-flex items-center justify-center rounded-full overflow-hidden bg-indigo-600 text-white font-bold select-none ${sizeClasses[size]}`}
     >
       {src ? (
         <img src={src} alt={alt} className="w-full h-full object-cover" />
@@ -142,7 +142,7 @@ const PositionTag = ({ position }: PositionTagProps) => {
   return (
     <span
       role="note"
-      aria-label={\`Position: \${position}\`}
+      aria-label={`Position: ${position}`}
       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800"
     >
       {position}
@@ -154,10 +154,10 @@ const TableHeaderCell = ({ label, sortable, sortDirection = 'none', onClick }: T
   return (
     <th
       role="columnheader"
-      aria-label={\`\${label} column header\`}
+      aria-label={`${label} column header`}
       aria-sort={sortDirection === 'none' ? 'none' : sortDirection === 'asc' ? 'ascending' : 'descending'}
       onClick={sortable ? onClick : undefined}
-      className={\`px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-900 select-none \${sortable ? 'cursor-pointer hover:bg-gray-800' : ''}\`}
+      className={`px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-900 select-none ${sortable ? 'cursor-pointer hover:bg-gray-800' : ''}`}
     >
       <div className="flex items-center gap-1">
         {label}
@@ -175,7 +175,7 @@ const TableDataCell = ({ value, emphasis }: TableDataCellProps) => {
   return (
     <td
       role="cell"
-      className={\`px-4 py-3 text-sm whitespace-nowrap \${emphasis ? 'font-bold text-white' : 'text-gray-200'}\`}
+      className={`px-4 py-3 text-sm whitespace-nowrap ${emphasis ? 'font-bold text-white' : 'text-gray-200'}`}
     >
       {value}
     </td>
@@ -209,7 +209,7 @@ const PlayerProfileCard = ({
   return (
     <section
       role="region"
-      aria-label={\`Player profile card for \${playerName}\`}
+      aria-label={`Player profile card for ${playerName}`}
       className="flex flex-col sm:flex-row items-center sm:items-start gap-6 p-6 bg-gray-800 rounded-2xl shadow-lg w-full"
     >
       <AvatarImage src={avatarSrc} alt={playerName} size="lg" />
@@ -241,7 +241,7 @@ const StatsTableRow = ({ game }: StatsTableRowProps) => {
   return (
     <tr
       role="row"
-      aria-label={\`Game stats row: \${game.date} vs \${game.opponent}\`}
+      aria-label={`Game stats row: ${game.date} vs ${game.opponent}`}
       className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors duration-150 cursor-default"
     >
       <TableDataCell value={game.date} />
@@ -260,7 +260,7 @@ const ChartTooltip = ({ date, avg, hits, hr, rbi }: ChartTooltipProps) => {
   return (
     <div
       role="tooltip"
-      aria-label={\`Stats for \${date}\`}
+      aria-label={`Stats for ${date}`}
       className="hidden group-hover:flex flex-col gap-1 absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 border border-gray-600 text-white text-xs rounded-lg p-3 shadow-xl z-10 whitespace-nowrap pointer-events-none"
     >
       <div className="font-bold border-b border-gray-700 pb-1 mb-1">{date}</div>
@@ -278,13 +278,13 @@ const PerformanceChartBar = ({ label, value, rawValue, color = 'bg-indigo-500', 
   return (
     <div
       role="graphics-symbol"
-      aria-label={\`Bar for \${label}: \${rawValue}\`}
+      aria-label={`Bar for ${label}: ${rawValue}`}
       className="flex flex-col items-center justify-end gap-1 flex-1 group relative h-full"
     >
       <ChartTooltip {...tooltipData} />
       <div 
-        className={\`w-full max-w-[40px] rounded-t-sm transition-all duration-300 \${color} group-hover:brightness-125\`}
-        style={{ height: \`\${heightPercent}%\` }}
+        className={`w-full max-w-[40px] rounded-t-sm transition-all duration-300 ${color} group-hover:brightness-125`}
+        style={{ height: `${heightPercent}%` }}
       />
       <span className="text-[10px] sm:text-xs text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis w-full text-center mt-1">
         {label}
@@ -371,7 +371,7 @@ const PlayerStatsTable = ({ rows }: PlayerStatsTableProps) => {
           <tbody>
             {paginatedRows.length > 0 ? (
               paginatedRows.map((row, idx) => (
-                <StatsTableRow key={\`\${row.date}-\${idx}\`} game={row} />
+                <StatsTableRow key={`${row.date}-${idx}`} game={row} />
               ))
             ) : (
               <tr>
@@ -447,9 +447,9 @@ const PerformanceChart = ({ games }: PerformanceChartProps) => {
             <button
               key={m.id}
               onClick={() => setActiveMetric(m.id)}
-              className={\`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors \${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
                 activeMetric === m.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-400 hover:text-white'
-              }\`}
+              }`}
             >
               {m.label}
             </button>
@@ -466,7 +466,7 @@ const PerformanceChart = ({ games }: PerformanceChartProps) => {
             
             return (
               <PerformanceChartBar
-                key={\`\${game.date}-\${i}\`}
+                key={`${game.date}-${i}`}
                 label={dateLabel}
                 value={normalized}
                 rawValue={game[activeMetric]}
@@ -614,7 +614,7 @@ export default function Page() {
     <div 
       role="main" 
       aria-label="Baseball player statistics dashboard"
-      className={\`\${isDark ? 'dark text-white' : 'text-gray-900'} p-4 sm:p-6 lg:p-10\`}
+      className={`${isDark ? 'dark text-white' : 'text-gray-900'} p-4 sm:p-6 lg:p-10`}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
         <DashboardHeader 
