@@ -11,10 +11,17 @@
           "title": "Design a modern baseball player stats dashboard",
           "description": "Create a responsive dashboard that displays baseball player statistics including batting average, home runs, RBIs, and recent game performance. Include player profile card, stats table, and performance chart components.",
           "createdAt": "2026-03-12T04:08:13.417Z"
+        },
+        {
+          "key": "BASEBALL-011",
+          "version": "2026-03-12_14-17-13",
+          "title": "Design a modern baseball player stats dashboard",
+          "description": "Create a responsive dashboard that displays baseball player statistics including batting average, home runs, RBIs, and recent game performance. Include player profile card, stats table, and performance chart components.",
+          "createdAt": "2026-03-12T05:28:16.863Z"
         }
       ],
-      "latestVersion": "2026-03-12_13-01-22",
-      "lastUpdated": "2026-03-12T04:08:13.417Z"
+      "latestVersion": "2026-03-12_14-17-13",
+      "lastUpdated": "2026-03-12T05:28:16.863Z"
     },
     {
       "key": "BASEBALL",
@@ -33,5 +40,5 @@
       "lastUpdated": "2026-03-12T04:59:03.720Z"
     }
   ],
-  "lastUpdated": "2026-03-12T04:59:03.720Z"
+  "lastUpdated": "2026-03-12T05:28:16.863Z"
 }
