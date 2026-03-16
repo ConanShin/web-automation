@@ -1,5 +1,5 @@
 import VersionList from "@/components/VersionList";
 
-export default function Baseball011VersionsPage() {
+export default function EventVersionsPage() {
   return <VersionList eventKey="BASEBALL-011" />;
 }
