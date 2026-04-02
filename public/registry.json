@@ -31,7 +31,23 @@
       ],
       "latestVersion": "2026-03-18_09-12-33",
       "lastUpdated": "2026-03-18T00:23:18.554Z"
+    },
+    {
+      "key": "GAME-009",
+      "title": "Baseball Game",
+      "description": "Create an interactive baseball game. Features: pitch timing with mouse click, batting with click timing, 9 innings, score board, base runners display, strike/ball/out count, simple AI opponent. The game should be visually appealing with smooth animations.",
+      "versions": [
+        {
+          "key": "GAME-009",
+          "version": "2026-04-02_15-43-31",
+          "title": "Baseball Game",
+          "description": "Create an interactive baseball game. Features: pitch timing with mouse click, batting with click timing, 9 innings, score board, base runners display, strike/ball/out count, simple AI opponent. The game should be visually appealing with smooth animations.",
+          "createdAt": "2026-04-02T06:55:17.113Z"
+        }
+      ],
+      "latestVersion": "2026-04-02_15-43-31",
+      "lastUpdated": "2026-04-02T06:55:17.113Z"
     }
   ],
-  "lastUpdated": "2026-03-18T00:23:18.554Z"
+  "lastUpdated": "2026-04-02T06:55:17.113Z"
 }
